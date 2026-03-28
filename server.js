@@ -29,7 +29,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: '*' } });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 
 // ── Global Middleware ──
 app.use(cors());
@@ -70,7 +70,7 @@ deadlineService.start();
 
 // ── Start Server ──
 server.listen(PORT, () => {
-  console.log(`\n  🖨️  PrintShop Server running on https://printshop-backend.onrender.com\n`);
+  console.log(`Server running on port ${PORT}`);
   console.log(`  📁 Database: ${path.join(__dirname, 'db')}`);
   console.log(`  🔐 JWT: Enabled`);
   console.log(`  ⚡ Socket.io: Rooms-based architecture`);
