@@ -4,13 +4,13 @@
    Server-synced deadlines & room-based events
    ============================================ */
 
-const API = 'https://your-backend.onrender.com/api';
+const API = 'https://printshop-backend.onrender.com/api';
 let socket;
 let serverTimeOffset = 0; // difference between server time and local time
 
 try {
   const token = localStorage.getItem('ps-token');
-  socket = io('https://your-backend.onrender.com', { auth: { token } });
+  socket = io('https://printshop-backend.onrender.com', { auth: { token } });
 } catch (e) { socket = null; }
 
 // Server-time sync for accurate countdowns

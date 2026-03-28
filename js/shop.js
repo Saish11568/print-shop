@@ -4,9 +4,9 @@
    Real-time updates via Socket.io
    ============================================ */
 
-const API = 'https://your-backend.onrender.com/api';
+const API = 'https://printshop-backend.onrender.com/api';
 const token = localStorage.getItem('ps-token');
-const socket = io('https://your-backend.onrender.com', { auth: { token } });
+const socket = io('https://printshop-backend.onrender.com', { auth: { token } });
 
 // ==================== Auth Helpers ====================
 function getToken() { return localStorage.getItem('ps-token'); }
