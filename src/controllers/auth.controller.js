@@ -130,7 +130,7 @@ async function forgotPassword(req, res) {
   console.log('  📧 PASSWORD RESET EMAIL (Demo)');
   console.log(`  To: ${user.email}`);
   console.log(`  Token: ${token}`);
-  console.log(`  Link: http://localhost:${PORT}/reset-password.html?token=${token}`);
+  console.log(`  Link: https://printshop-backend.onrender.com/reset-password.html?token=${token}`);
   console.log('  ============================================\n');
 
   res.json({ success: true, message: 'If an account exists, a reset link has been sent.' });

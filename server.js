@@ -70,7 +70,7 @@ deadlineService.start();
 
 // ── Start Server ──
 server.listen(PORT, () => {
-  console.log(`\n  🖨️  PrintShop Server running on http://localhost:${PORT}\n`);
+  console.log(`\n  🖨️  PrintShop Server running on https://printshop-backend.onrender.com\n`);
   console.log(`  📁 Database: ${path.join(__dirname, 'db')}`);
   console.log(`  🔐 JWT: Enabled`);
   console.log(`  ⚡ Socket.io: Rooms-based architecture`);
