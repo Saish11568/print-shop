@@ -136,7 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
       localStorage.removeItem('ps-token');
       localStorage.removeItem('loggedInUser');
     } else {
-      fetch('http://localhost:3000/api/verify-token', {
+      fetch('https://your-backend.onrender.com/api/verify-token', {
         headers: { 'Authorization': 'Bearer ' + token }
       })
       .then(r => {
@@ -200,7 +200,7 @@ document.addEventListener('DOMContentLoaded', () => {
       setLoading(loginBtn, true);
 
       try {
-        const response = await fetch('http://localhost:3000/api/login', {
+        const response = await fetch('https://your-backend.onrender.com/api/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password, role })
@@ -271,7 +271,7 @@ document.addEventListener('DOMContentLoaded', () => {
       setLoading(signupBtn, true);
 
       try {
-        const response = await fetch('http://localhost:3000/api/signup', {
+        const response = await fetch('https://your-backend.onrender.com/api/signup', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name, email, password, role, accessKey })
