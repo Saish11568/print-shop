@@ -131,30 +131,33 @@ document.addEventListener('DOMContentLoaded', () => {
     const roleInput = document.getElementById('fixedRole');
     const expectedRole = roleInput ? roleInput.value : null;
 
-    // If they navigate to a login page for a DIFFERENT role, force clean their session 
-    // so they can actually log in as the new role instead of being forced back.
     if (expectedRole && user.role !== expectedRole) {
-      console.log('[Auth] Role mismatch on login page! Clearing old session to allow new login.');
-      localStorage.removeItem('ps-token');
-      localStorage.removeItem('loggedInUser');
+      console.log(`[Auth] User is logged in as ${user.role}, but visited ${expectedRole} login page. Redirecting...`);
+    }
+
+    // For Google login users, bypass backend token verification as it uses a different JWT logic locally
+    if (user.loginType === 'google' || (typeof token === 'string' && token.startsWith('google-bypassed-token'))) {
+      const roleRedirects = { coordinator: 'cr.html', shop: 'shopkeeper.html', student: 'student.html' };
+      const dest = roleRedirects[user.role] || 'student.html';
+      window.location.href = dest;
     } else {
-      fetch(`${BASE_URL}/api/login`, {
+      // Verify native token
+      fetch(`${BASE_URL}/api/verify-token`, {
         headers: { 'Authorization': 'Bearer ' + token }
       })
         .then(r => {
           if (r.ok) {
-            // Token is valid — redirect to the appropriate dashboard
             const roleRedirects = { coordinator: 'cr.html', shop: 'shopkeeper.html', student: 'student.html' };
             const dest = roleRedirects[user.role];
             if (dest) window.location.href = dest;
           } else {
-            // Token is expired or invalid — clear stale session so user can log in
+            // Token is genuinely expired or invalid, so we clear it
             localStorage.removeItem('ps-token');
             localStorage.removeItem('loggedInUser');
           }
         })
         .catch(() => {
-          // Server unreachable — clear stale session
+          // If offline or backend down, just clear session to be safe (or don't, but following original behavior here)
           localStorage.removeItem('ps-token');
           localStorage.removeItem('loggedInUser');
         });
