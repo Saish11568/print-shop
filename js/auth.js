@@ -315,58 +315,36 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 // ==================== GOOGLE SIGN-IN ====================
-function parseJwt(token) {
-  try {
-    const base64Url = token.split('.')[1];
-    const base64 = typeof atob !== 'undefined' ? atob(base64Url) : Buffer.from(base64Url, 'base64').toString();
-    return JSON.parse(base64);
-  } catch (e) {
-    console.error("JWT parse failed", e);
-    return {};
-  }
-}
-
-function redirectUserByRole(email) {
-  if (!email) return;
-  const lowerEmail = email.toLowerCase();
-
-  if (lowerEmail.includes("cr")) {
-    window.location.href = "cr.html";
-  } else if (lowerEmail.includes("shop")) {
-    window.location.href = "shopkeeper.html";
-  } else {
-    window.location.href = "student.html";
-  }
-}
-
 window.handleCredentialResponse = function (response) {
-  console.log("Google JWT:", response.credential);
+  fetch(`${BASE_URL}/api/auth/google`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      token: response.credential
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.error || !data.token) {
+      console.error("Google login failed:", data.error);
+      return;
+    }
 
-  // Decode the Google JWT token using existing parseJwt function
-  const data = parseJwt(response.credential);
+    localStorage.setItem("ps-token", data.token);
+    localStorage.setItem("loggedInUser", JSON.stringify(data.user));
 
-  // Extract user info (email, name)
-  const user = {
-    email: data.email,
-    name: data.name,
-    loginType: "google"
-  };
-
-  const lowerEmail = user.email.toLowerCase();
-  if (lowerEmail.includes("cr")) {
-    user.role = "coordinator";
-  } else if (lowerEmail.includes("shop")) {
-    user.role = "shop";
-  } else {
-    user.role = "student";
-  }
-
-  // Store user in localStorage
-  localStorage.setItem("loggedInUser", JSON.stringify(user));
-
-  // Store a temporary token to satisfy existing auth system
-  localStorage.setItem("ps-token", "google-bypassed-token-" + Date.now());
-
-  // Call redirectUserByRole(email) to redirect user
-  redirectUserByRole(user.email);
+    // redirect based on role
+    if (data.user.role === "coordinator") {
+        window.location.href = "cr.html";
+    } else if (data.user.role === "shop") {
+        window.location.href = "shopkeeper.html";
+    } else {
+        window.location.href = "student.html";
+    }
+  })
+  .catch(err => {
+      console.error("Google login connection failed:", err);
+  });
 };
