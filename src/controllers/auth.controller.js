@@ -61,6 +61,7 @@ async function signup(req, res) {
 }
 
 async function login(req, res) {
+  console.log("LOGIN ROUTE HIT");
   const { email, password, role } = req.body;
   
   console.log("LOGIN EMAIL:", email);
