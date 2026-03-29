@@ -327,29 +327,43 @@ function redirectUserByRole(email) {
   if (!email) return;
   const lowerEmail = email.toLowerCase();
 
-  if (lowerEmail.includes("admin")) {
-    window.location.href = "admin-dashboard.html";
-  } else if (lowerEmail.includes("shop") || lowerEmail.includes("cr")) {
-    window.location.href = "shopkeeper-dashboard.html";
+  if (lowerEmail.includes("cr")) {
+    window.location.href = "cr.html";
+  } else if (lowerEmail.includes("shop")) {
+    window.location.href = "shopkeeper.html";
   } else {
-    window.location.href = "student-dashboard.html";
+    window.location.href = "student.html";
   }
 }
 
-window.handleGoogleLogin = function (response) {
+window.handleCredentialResponse = function (response) {
+  console.log("Google JWT:", response.credential);
+
+  // Decode the Google JWT token using existing parseJwt function
   const data = parseJwt(response.credential);
 
+  // Extract user info (email, name)
   const user = {
     email: data.email,
     name: data.name,
     loginType: "google"
   };
 
-  // Ensure role consistency for existing systems bridging the gap between normal auth and google bypass
+  const lowerEmail = user.email.toLowerCase();
+  if (lowerEmail.includes("cr")) {
+    user.role = "coordinator";
+  } else if (lowerEmail.includes("shop")) {
+    user.role = "shop";
+  } else {
+    user.role = "student";
+  }
+
+  // Store user in localStorage
   localStorage.setItem("loggedInUser", JSON.stringify(user));
 
-  // Fake token required to pass existing guards locally:
+  // Store a temporary token to satisfy existing auth system
   localStorage.setItem("ps-token", "google-bypassed-token-" + Date.now());
 
+  // Call redirectUserByRole(email) to redirect user
   redirectUserByRole(user.email);
 };
