@@ -48,6 +48,10 @@ app.use(express.static(path.join(__dirname)));
 
 // ── Mount API Routes ──
 app.use('/api', authRoutes);
+
+app.get('/test', (req, res) => {
+  res.send("Backend working");
+});
 app.use('/api/classrooms', classroomRoutes);
 app.use('/api/polls', pollRoutes);
 app.use('/api/orders', orderRoutes);
