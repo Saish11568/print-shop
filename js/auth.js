@@ -1,3 +1,5 @@
+const BASE_URL = "https://print-shop-boqx.onrender.com";
+
 // ==================== SMART EMAIL VALIDATION ====================
 function validateSmartEmail(email) {
   if (!email) return { valid: false, msg: 'Please enter your email address.' };
@@ -136,7 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
       localStorage.removeItem('ps-token');
       localStorage.removeItem('loggedInUser');
     } else {
-      fetch("https://print-shop-abc123.onrender.com/api/login", {
+      fetch(`${BASE_URL}/api/login`, {
         headers: { 'Authorization': 'Bearer ' + token }
       })
         .then(r => {
@@ -200,7 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
       setLoading(loginBtn, true);
 
       try {
-        const response = await fetch("https://print-shop-boqx.onrender.com/api/login", {
+        const response = await fetch(`${BASE_URL}/api/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password, role })
@@ -274,7 +276,7 @@ document.addEventListener('DOMContentLoaded', () => {
       try {
 
 
-        const response = await fetch("https://print-shop-boqx.onrender.com/api/signup", {
+        const response = await fetch(`${BASE_URL}/api/signup`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name, email, password, role, accessKey })

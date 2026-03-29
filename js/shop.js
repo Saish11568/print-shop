@@ -4,9 +4,9 @@
    Real-time updates via Socket.io
    ============================================ */
 
-const API = 'https://printshop-backend.onrender.com/api';
+const BASE_URL = "https://print-shop-boqx.onrender.com";
 const token = localStorage.getItem('ps-token');
-const socket = io('https://printshop-backend.onrender.com', { auth: { token } });
+const socket = io(BASE_URL, { auth: { token } });
 
 // ==================== Auth Helpers ====================
 function getToken() { return localStorage.getItem('ps-token'); }
@@ -135,7 +135,7 @@ let shopData = { orders: [], payments: [], polls: [], classrooms: [], totalOrder
 
 async function fetchDashboard() {
   try {
-    const res = await fetch(API + '/dashboard/shop', { headers: authHeaders() });
+    const res = await fetch(`${BASE_URL}/api/dashboard/shop`, { headers: authHeaders() });
     if (res.status === 401) { window.location.href = 'shopkeeper-login.html'; return; }
     if (!res.ok) throw new Error('Failed to fetch');
     shopData = await res.json();
@@ -297,7 +297,7 @@ function renderOrdersTable() {
 
 async function verifyPayment(paymentId, action) {
   try {
-    const res = await fetch(API + '/payments/' + paymentId + '/verify', {
+    const res = await fetch(`${BASE_URL}/api/payments/${paymentId}/verify`, {
       method: 'PUT',
       headers: authHeaders(),
       body: JSON.stringify({ action })
@@ -465,7 +465,7 @@ function renderAIVerificationPanel() {
 
 async function verifyPayment(paymentId, action) {
   try {
-    const res = await fetch(API + '/payments/' + paymentId + '/verify', {
+    const res = await fetch(`${BASE_URL}/api/payments/${paymentId}/verify`, {
       method: 'PUT',
       headers: authHeaders(),
       body: JSON.stringify({ action })
@@ -484,7 +484,7 @@ async function verifyPayment(paymentId, action) {
 // ==================== ORDER STATUS UPDATE ====================
 async function updateOrderStatus(orderId, status) {
   try {
-    const res = await fetch(API + '/orders/' + orderId + '/status', {
+    const res = await fetch(`${BASE_URL}/api/orders/${orderId}/status`, {
       method: 'PUT',
       headers: authHeaders(),
       body: JSON.stringify({ status })
@@ -503,7 +503,7 @@ async function updateOrderStatus(orderId, status) {
 
 async function collectOrder(orderId, studentEmail) {
   try {
-    const res = await fetch(API + '/orders/' + orderId + '/collect', {
+    const res = await fetch(`${BASE_URL}/api/orders/${orderId}/collect`, {
       method: 'POST',
       headers: authHeaders(),
       body: JSON.stringify({ studentEmail })

@@ -6,6 +6,7 @@
   <title>Student Login - PrintShop</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body class="login-page">
 
@@ -64,20 +65,17 @@
           <span class="spinner-small hidden absolute" style="right:20px;"></span>
         </button>
       
-        <div class="mt-4" style="text-align: center; margin-top: 16px;">
+        <div class="mt-4" style="text-align: center; margin-top: 16px; display: flex; justify-content: center;">
           <div id="g_id_onload"
                data-client_id="911807895290-mtuvqh83ir6ivhubi69ipjnk43urvsuh.apps.googleusercontent.com"
-               data-callback="handleGoogleLogin"
-               data-auto_prompt="false">
+               data-callback="handleCredentialResponse">
           </div>
           <div class="g_id_signin"
                data-type="standard"
                data-size="large"
                data-theme="outline"
                data-text="sign_in_with"
-               data-shape="rectangular"
-               data-logo_alignment="center"
-               style="display: inline-block;">
+               data-shape="rectangular">
           </div>
         </div>
       </form>
@@ -90,6 +88,5 @@
   </div>
 
   <script src="js/auth.js"></script>
-<script src="https://accounts.google.com/gsi/client" async defer></script>
 </body>
 </html>
