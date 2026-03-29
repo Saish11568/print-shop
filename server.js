@@ -2,13 +2,14 @@
  * PrintShop Server — Entry Point
  * Thin bootstrapper that mounts routes, initializes Socket.io, and starts the deadline scheduler.
  */
-require('dotenv').config();
-const express = require('express');
+require("dotenv").config();  // MUST BE FIRST
+
+const mongoose = require("mongoose");
 const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
 const path = require('path');
-
+const express = require('express');
 // ── Services ──
 const socketService = require('./src/services/socket.service');
 const deadlineService = require('./src/services/deadline.service');
@@ -31,8 +32,13 @@ const io = new Server(server, { cors: { origin: '*' } });
 
 const PORT = process.env.PORT || 5000;
 
+// ── MongoDB Connection ──
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log('MongoDB Connected'))
+  .catch(err => console.error('MongoDB connection error:', err));
+
 // ── Global Middleware ──
-app.use(cors());
+app.use(cors({ origin: '*' }));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.static(path.join(__dirname)));
 
@@ -45,13 +51,20 @@ app.use('/api/payments', paymentRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 
 // Server-time endpoint (also on /api for consistency)
-app.get('/api/server-time', (req, res) => {
-  const { readDB } = require('./src/config/db');
-  const polls = readDB('polls');
-  const activePolls = polls
-    .filter(p => !p.expired)
-    .map(p => ({ id: p.id, expiresAt: p.expiresAt, title: p.title }));
-  res.json({ serverTime: Date.now(), polls: activePolls });
+app.get('/api/server-time', async (req, res) => {
+  try {
+    const Poll = require('./src/models/Poll');
+    const polls = await Poll.find({ expired: false }).select('id expiresAt title');
+    const activePolls = polls.map(p => ({
+      id: p.id,
+      expiresAt: p.expiresAt,
+      title: p.title
+    }));
+    res.json({ serverTime: Date.now(), polls: activePolls });
+  } catch (error) {
+    console.error('Error fetching server time:', error);
+    res.status(500).json({ error: 'Failed to fetch server time' });
+  }
 });
 
 // ── 404 handler for API routes ──
@@ -76,4 +89,5 @@ server.listen(PORT, () => {
   console.log(`  ⚡ Socket.io: Rooms-based architecture`);
   console.log(`  ⏰ Deadline Scheduler: Active (30s interval)`);
   console.log(`  📦 MVC: controllers / routes / services / middleware\n`);
+  console.log("MONGO_URI:", process.env.MONGO_URI);
 });

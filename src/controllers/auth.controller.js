@@ -62,22 +62,27 @@ async function signup(req, res) {
 
 async function login(req, res) {
   const { email, password, role } = req.body;
+  
+  console.log("LOGIN EMAIL:", email);
+
   if (!email || !password) {
     return res.status(400).json({ error: 'Email and password are required' });
   }
 
   const normalizedEmail = email.toLowerCase().trim();
   const users = readDB('users');
-  const user = users.find(u => u.email === normalizedEmail && u.role === role);
+  const user = users.find(u => u.email === normalizedEmail);
+  
+  console.log("USER FOUND:", user);
 
-  // Constant-time comparison to prevent timing attacks
-  const dummyHash = '$2a$10$invalidhashforstupidtimingattacks.........';
-  const isValid = user
-    ? await bcrypt.compare(password, user.password)
-    : await bcrypt.compare(password, dummyHash).then(() => false);
+  if (!user) {
+    return res.status(400).json({ message: "Invalid credentials" });
+  }
 
-  if (!user || !isValid) {
-    return res.status(401).json({ error: 'Invalid email or password' });
+  const isMatch = await bcrypt.compare(password, user.password);
+
+  if (!isMatch) {
+    return res.status(400).json({ message: "Invalid credentials" });
   }
 
   const token = jwt.sign(
