@@ -1,20 +1,20 @@
 // ==================== SMART EMAIL VALIDATION ====================
 function validateSmartEmail(email) {
   if (!email) return { valid: false, msg: 'Please enter your email address.' };
-  
+
   const parts = email.split('@');
   if (parts.length !== 2) return { valid: false, msg: 'Please enter a valid and meaningful email address.' };
-  
+
   const [username, domain] = parts;
   if (!domain) return { valid: false, msg: 'Please enter a valid and meaningful email address.' };
-  
+
   const allowedDomains = ['gmail.com', 'outlook.com', 'yahoo.com'];
   if (!allowedDomains.includes(domain.toLowerCase())) {
     return { valid: false, msg: 'Only gmail.com, outlook.com, or yahoo.com are allowed.' };
   }
-  
+
   if (username.length < 5) return { valid: false, msg: 'Email username must be at least 5 characters long.' };
-  
+
   const blockWords = ['abc', 'xyz', 'test', 'demo', 'user', 'temp'];
   const lowerUser = username.toLowerCase();
   for (let w of blockWords) {
@@ -22,15 +22,15 @@ function validateSmartEmail(email) {
       return { valid: false, msg: 'Please enter a valid and meaningful email address.' };
     }
   }
-  
+
   const hasLetter = /[a-zA-Z]/.test(username);
   const hasNumber = /[0-9]/.test(username);
   const hasFullNamePattern = /[\._]/.test(username);
-  
+
   if (!hasLetter || (!hasNumber && !hasFullNamePattern)) {
     return { valid: false, msg: 'Please enter a valid and meaningful email address.' };
   }
-  
+
   return { valid: true, msg: '' };
 }
 
@@ -38,10 +38,10 @@ function attachEmailValidator(form, emailInput, submitBtn) {
   if (!emailInput || !form || !submitBtn) return;
   const wrapper = emailInput.closest('.input-with-icon');
   const group = emailInput.closest('.form-group');
-  if(!group) return;
-  
+  if (!group) return;
+
   let errEl = group.querySelector('.email-error-msg');
-  if(!errEl) {
+  if (!errEl) {
     errEl = document.createElement('p');
     errEl.className = 'email-error-msg text-xs hidden';
     errEl.style.color = '#DC2626';
@@ -49,9 +49,9 @@ function attachEmailValidator(form, emailInput, submitBtn) {
     errEl.style.marginTop = '4px';
     group.appendChild(errEl);
   }
-  
+
   let successIcon = wrapper.querySelector('.email-success-icon');
-  if(!successIcon) {
+  if (!successIcon) {
     successIcon = document.createElement('span');
     successIcon.className = 'input-action-icon email-success-icon hidden';
     successIcon.style.color = '#10B981';
@@ -62,20 +62,20 @@ function attachEmailValidator(form, emailInput, submitBtn) {
     successIcon.innerHTML = '✅';
     wrapper.appendChild(successIcon);
   }
-  
+
   emailInput.addEventListener('input', () => {
     const val = emailInput.value.trim();
-    if(val === '') {
-       wrapper.classList.remove('input-invalid', 'input-valid');
-       errEl.classList.add('hidden');
-       successIcon.classList.add('hidden');
-       submitBtn.disabled = true;
-       submitBtn.style.opacity = '0.5';
-       return;
+    if (val === '') {
+      wrapper.classList.remove('input-invalid', 'input-valid');
+      errEl.classList.add('hidden');
+      successIcon.classList.add('hidden');
+      submitBtn.disabled = true;
+      submitBtn.style.opacity = '0.5';
+      return;
     }
-    
+
     const res = validateSmartEmail(val);
-    if(!res.valid) {
+    if (!res.valid) {
       wrapper.classList.add('input-invalid');
       wrapper.classList.remove('input-valid');
       errEl.textContent = res.msg;
@@ -95,12 +95,12 @@ function attachEmailValidator(form, emailInput, submitBtn) {
 
   emailInput.addEventListener('blur', () => {
     const val = emailInput.value.trim();
-    if(val === '') return;
+    if (val === '') return;
     const res = validateSmartEmail(val);
-    if(!res.valid) {
-       wrapper.classList.remove('shake-anim');
-       void wrapper.offsetWidth;
-       wrapper.classList.add('shake-anim');
+    if (!res.valid) {
+      wrapper.classList.remove('shake-anim');
+      void wrapper.offsetWidth;
+      wrapper.classList.add('shake-anim');
     }
   });
 }
@@ -124,7 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // but ONLY after verifying the token is still valid on the server.
   const token = localStorage.getItem('ps-token');
   const user = (() => { try { return JSON.parse(localStorage.getItem('loggedInUser')); } catch (e) { return null; } })();
-  
+
   if (token && user) {
     const roleInput = document.getElementById('fixedRole');
     const expectedRole = roleInput ? roleInput.value : null;
@@ -136,26 +136,26 @@ document.addEventListener('DOMContentLoaded', () => {
       localStorage.removeItem('ps-token');
       localStorage.removeItem('loggedInUser');
     } else {
-      fetch('https://printshop-backend.onrender.com/api/verify-token', {
+      fetch("https://print-shop-abc123.onrender.com/api/login", {
         headers: { 'Authorization': 'Bearer ' + token }
       })
-      .then(r => {
-        if (r.ok) {
-          // Token is valid — redirect to the appropriate dashboard
-          const roleRedirects = { coordinator: 'cr.html', shop: 'shopkeeper.html', student: 'student.html' };
-          const dest = roleRedirects[user.role];
-          if (dest) window.location.href = dest;
-        } else {
-          // Token is expired or invalid — clear stale session so user can log in
+        .then(r => {
+          if (r.ok) {
+            // Token is valid — redirect to the appropriate dashboard
+            const roleRedirects = { coordinator: 'cr.html', shop: 'shopkeeper.html', student: 'student.html' };
+            const dest = roleRedirects[user.role];
+            if (dest) window.location.href = dest;
+          } else {
+            // Token is expired or invalid — clear stale session so user can log in
+            localStorage.removeItem('ps-token');
+            localStorage.removeItem('loggedInUser');
+          }
+        })
+        .catch(() => {
+          // Server unreachable — clear stale session
           localStorage.removeItem('ps-token');
           localStorage.removeItem('loggedInUser');
-        }
-      })
-      .catch(() => {
-        // Server unreachable — clear stale session
-        localStorage.removeItem('ps-token');
-        localStorage.removeItem('loggedInUser');
-      });
+        });
     }
   }
 
@@ -200,7 +200,7 @@ document.addEventListener('DOMContentLoaded', () => {
       setLoading(loginBtn, true);
 
       try {
-        const response = await fetch('https://printshop-backend.onrender.com/api/login', {
+        const response = await fetch("https://print-shop-boqx.onrender.com/api/login", {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password, role })
@@ -272,7 +272,9 @@ document.addEventListener('DOMContentLoaded', () => {
       setLoading(signupBtn, true);
 
       try {
-        const response = await fetch('https://printshop-backend.onrender.com/api/signup', {
+
+
+        const response = await fetch("https://print-shop-boqx.onrender.com/api/signup", {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name, email, password, role, accessKey })
@@ -313,7 +315,7 @@ function parseJwt(token) {
     const base64Url = token.split('.')[1];
     const base64 = typeof atob !== 'undefined' ? atob(base64Url) : Buffer.from(base64Url, 'base64').toString();
     return JSON.parse(base64);
-  } catch(e) {
+  } catch (e) {
     console.error("JWT parse failed", e);
     return {};
   }
@@ -322,7 +324,7 @@ function parseJwt(token) {
 function redirectUserByRole(email) {
   if (!email) return;
   const lowerEmail = email.toLowerCase();
-  
+
   if (lowerEmail.includes("admin")) {
     window.location.href = "admin-dashboard.html";
   } else if (lowerEmail.includes("shop") || lowerEmail.includes("cr")) {
@@ -332,9 +334,9 @@ function redirectUserByRole(email) {
   }
 }
 
-window.handleGoogleLogin = function(response) {
+window.handleGoogleLogin = function (response) {
   const data = parseJwt(response.credential);
-  
+
   const user = {
     email: data.email,
     name: data.name,
@@ -343,7 +345,7 @@ window.handleGoogleLogin = function(response) {
 
   // Ensure role consistency for existing systems bridging the gap between normal auth and google bypass
   localStorage.setItem("loggedInUser", JSON.stringify(user));
-  
+
   // Fake token required to pass existing guards locally:
   localStorage.setItem("ps-token", "google-bypassed-token-" + Date.now());
 
