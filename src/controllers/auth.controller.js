@@ -7,7 +7,7 @@ const axios = require('axios');
 const User = require('../models/User'); // Mongoose Model
 const { readDB, writeDB } = require('../config/db'); // Used only for 'keys' collection
 const { sanitize, validateEmail } = require('../middleware/validate');
-const { JWT_SECRET } = require('../middleware/auth');
+const JWT_SECRET = process.env.JWT_SECRET;
 const crypto = require('crypto');
 
 async function signup(req, res) {
@@ -70,27 +70,38 @@ async function signup(req, res) {
 
 async function login(req, res) {
   try {
-    const { email, password } = req.body;
+    const { email, password, role } = req.body;
 
-    if (!email || !password) {
-      return res.status(400).json({ error: 'Email and password are required' });
+    if (!email || !password || !role) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
+
+    if (!JWT_SECRET) {
+      console.error("JWT_SECRET missing");
+      return res.status(500).json({ error: "Server config error" });
     }
 
     const normalizedEmail = email.toLowerCase().trim();
     const user = await User.findOne({ email: normalizedEmail });
 
-    if (!user) {
-      return res.status(400).json({ message: "Invalid credentials" });
+    if (!user || user.role !== role) {
+      return res.status(401).json({ error: "Invalid credentials" });
     }
 
-    // If an account was made through Google and doesn't have a password
-    if (user.authType === 'google' && !user.password) {
-      return res.status(400).json({ message: "Please use Google Sign-In for this account." });
+    if (user.authType === 'google' || !user.password) {
+      return res.status(400).json({ error: "Please use Google Sign-In" });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
+    let isMatch = false;
+    try {
+      isMatch = await bcrypt.compare(password, user.password);
+    } catch (bcryptErr) {
+      console.error("bcrypt compare error:", bcryptErr);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+
     if (!isMatch) {
-      return res.status(400).json({ message: "Invalid credentials" });
+      return res.status(401).json({ error: "Invalid credentials" });
     }
 
     const token = jwt.sign(
@@ -100,13 +111,17 @@ async function login(req, res) {
     );
 
     res.json({
-      success: true,
+      message: "Login successful",
       token,
-      user: { id: user._id || user.id, name: user.name, email: user.email, role: user.role }
+      user: { id: user._id || user.id, email: user.email, role: user.role }
     });
-  } catch (error) {
-    console.error('Login error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+  } catch (err) {
+    console.error("LOGIN ERROR FULL:", {
+      message: err.message,
+      stack: err.stack,
+      body: req.body
+    });
+    res.status(500).json({ error: "Internal server error" });
   }
 }
 

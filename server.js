@@ -32,18 +32,20 @@ const io = new Server(server, { cors: { origin: '*' } });
 
 const PORT = process.env.PORT || 5000;
 
+// ── Check Environment Variables ──
+if (!process.env.MONGO_URI || !process.env.JWT_SECRET) {
+  console.error("CRITICAL ERROR: MONGO_URI or JWT_SECRET is missing!");
+  process.exit(1);
+}
+
 // ── MongoDB Connection ──
 mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('MongoDB Connected'))
-  .catch(err => console.error('MongoDB connection error:', err));
+  .then(() => console.log('MongoDB connected'))
+  .catch(err => console.error('MongoDB error:', err));
 
 // ── Global Middleware ──
-app.use(cors({
-  origin: '*',
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  credentials: true
-}));
-app.use(express.json({ limit: '50mb' }));
+app.use(cors({ origin: "*" }));
+app.use(express.json());
 app.use(express.static(path.join(__dirname)));
 
 app.get('/debug-routes', (req, res) => {
