@@ -85,7 +85,7 @@ async function login(req, res) {
     const user = await User.findOne({ email: normalizedEmail });
 
     if (!user || user.role !== role) {
-      return res.status(401).json({ error: "Invalid credentials" });
+      return res.status(401).json({ error: "User not found" });
     }
 
     if (user.authType === 'google' || !user.password) {
@@ -101,7 +101,7 @@ async function login(req, res) {
     }
 
     if (!isMatch) {
-      return res.status(401).json({ error: "Invalid credentials" });
+      return res.status(401).json({ error: "Incorrect password" });
     }
 
     const token = jwt.sign(

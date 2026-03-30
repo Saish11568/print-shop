@@ -1,4 +1,5 @@
 const BASE_URL = "https://print-shop-boqx.onrender.com";
+const API = BASE_URL + "/api";
 
 // ==================== SMART EMAIL VALIDATION ====================
 function validateSmartEmail(email) {
@@ -142,7 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
       window.location.href = dest;
     } else {
       // Verify native token
-      fetch(`${BASE_URL}/api/verify-token`, {
+      fetch(`${API}/verify-token`, {
         headers: { 'Authorization': 'Bearer ' + token }
       })
         .then(r => {
@@ -205,7 +206,7 @@ document.addEventListener('DOMContentLoaded', () => {
       setLoading(loginBtn, true);
 
       try {
-        const response = await fetch(`${BASE_URL}/api/login`, {
+        const response = await fetch(`${API}/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password, role })
@@ -240,7 +241,7 @@ document.addEventListener('DOMContentLoaded', () => {
             window.location.href = destination;
           }, 300);
         } else {
-          showError(loginError, result.error || 'Invalid credentials');
+          showError(loginError, result.message || result.error || 'Login failed');
           setLoading(loginBtn, false);
         }
       } catch (err) {
@@ -279,7 +280,7 @@ document.addEventListener('DOMContentLoaded', () => {
       try {
 
 
-        const response = await fetch(`${BASE_URL}/api/signup`, {
+        const response = await fetch(`${API}/signup`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name, email, password, role, accessKey })
@@ -316,7 +317,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 // ==================== GOOGLE SIGN-IN ====================
 window.handleCredentialResponse = function (response) {
-  fetch(`${BASE_URL}/api/auth/google`, {
+  fetch(`${API}/auth/google`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json"

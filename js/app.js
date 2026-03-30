@@ -5,6 +5,7 @@
    ============================================ */
 
 const BASE_URL = "https://print-shop-boqx.onrender.com";
+const API = BASE_URL + "/api";
 let socket;
 let serverTimeOffset = 0; // difference between server time and local time
 
@@ -17,7 +18,7 @@ try {
 async function syncServerTime() {
   try {
     const before = Date.now();
-    const r = await fetch(`${BASE_URL}/api/server-time`);
+    const r = await fetch(`${API}/server-time`);
     if (!r.ok) return;
     const data = await r.json();
     const latency = (Date.now() - before) / 2;
@@ -151,28 +152,28 @@ let _classrooms = [], _polls = [], _orders = [];
 
 async function fetchClassrooms() {
   try {
-    const r = await fetch(`${BASE_URL}/api/classrooms`, { headers: authHeaders() });
+    const r = await fetch(`${API}/classrooms`, { headers: authHeaders() });
     if (r.ok) _classrooms = await r.json();
   } catch (e) { }
   return _classrooms;
 }
 async function fetchAllClassrooms() {
   try {
-    const r = await fetch(`${BASE_URL}/api/classrooms/all`, { headers: authHeaders() });
+    const r = await fetch(`${API}/classrooms/all`, { headers: authHeaders() });
     if (r.ok) return await r.json();
   } catch (e) { }
   return _classrooms;
 }
 async function fetchPolls() {
   try {
-    const r = await fetch(`${BASE_URL}/api/polls`, { headers: authHeaders() });
+    const r = await fetch(`${API}/polls`, { headers: authHeaders() });
     if (r.ok) _polls = await r.json();
   } catch (e) { }
   return _polls;
 }
 async function fetchOrders() {
   try {
-    const r = await fetch(`${BASE_URL}/api/orders`, { headers: authHeaders() });
+    const r = await fetch(`${API}/orders`, { headers: authHeaders() });
     if (r.ok) _orders = await r.json();
   } catch (e) { }
   return _orders;
@@ -287,7 +288,7 @@ async function createClassroom() {
   const n = document.getElementById('classroom-name'), s = document.getElementById('classroom-subject'), sem = document.getElementById('classroom-semester');
   if (!n?.value.trim() || !s?.value.trim()) { showToast('warning', 'Missing Fields', 'Fill in class name and subject.'); return; }
   try {
-    const res = await fetch(`${BASE_URL}/api/classrooms`, {
+    const res = await fetch(`${API}/classrooms`, {
       method: 'POST', headers: authHeaders(),
       body: JSON.stringify({ name: n.value.trim(), subject: s.value.trim(), semester: sem?.value || 4 })
     });
@@ -366,6 +367,13 @@ function removeQRFile() {
 }
 
 async function createPrintPoll() {
+  console.log("Create Poll button clicked");
+  const token = getToken();
+  const user = getLoggedInUser();
+  if (!token || !user) {
+    showToast('error', 'Auth Error', 'User not signed in. Please log in first.');
+    return;
+  }
   const cid = document.getElementById('poll-classroom')?.value;
   const title = document.getElementById('poll-title');
   const desc = document.getElementById('poll-description');
@@ -396,7 +404,7 @@ async function createPrintPoll() {
     docData = { name: fileName, pages: Math.floor(Math.random() * 20) + 5, size: fileSize, uploadedAt: Date.now() };
   }
   try {
-    const res = await fetch(`${BASE_URL}/api/polls`, {
+    const res = await fetch(`${API}/polls`, {
       method: 'POST', headers: authHeaders(),
       body: JSON.stringify({
         classroomId: cid,
@@ -501,7 +509,7 @@ function filterStatusQueue(f, el) {
 
 async function updateOrder(id, status) {
   try {
-    const res = await fetch(`${BASE_URL}/api/orders/${id}/status`, {
+    const res = await fetch(`${API}/orders/${id}/status`, {
       method: 'PUT', headers: authHeaders(),
       body: JSON.stringify({ status })
     });
@@ -515,7 +523,7 @@ async function updateOrder(id, status) {
 
 async function collectOrder(orderId, studentEmail) {
   try {
-    const res = await fetch(`${BASE_URL}/api/orders/${orderId}/collect`, {
+    const res = await fetch(`${API}/orders/${orderId}/collect`, {
       method: 'POST',
       headers: authHeaders(),
       body: JSON.stringify({ studentEmail })
@@ -656,7 +664,7 @@ async function joinClassroom() {
   const input = document.getElementById('join-code-input');
   if (!input?.value.trim()) { showToast('warning', 'Enter Code', 'Please enter the join code.'); return; }
   try {
-    const res = await fetch(`${BASE_URL}/api/classrooms/join`, {
+    const res = await fetch(`${API}/classrooms/join`, {
       method: 'POST', headers: authHeaders(),
       body: JSON.stringify({ code: input.value.trim().toUpperCase() })
     });
@@ -728,7 +736,7 @@ function renderStudentPolls() {
 
 async function studentJoinPoll(pollId) {
   try {
-    const res = await fetch(`${BASE_URL}/api/polls/${pollId}/join`, {
+    const res = await fetch(`${API}/polls/${pollId}/join`, {
       method: 'POST', headers: authHeaders()
     });
     if (res.ok) {
