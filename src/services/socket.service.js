@@ -4,7 +4,7 @@
  * No global broadcasts — all events targeted to rooms.
  */
 const jwt = require('jsonwebtoken');
-const { JWT_SECRET } = require('../middleware/auth');
+const JWT_SECRET = process.env.JWT_SECRET;
 const { readDB } = require('../config/db');
 
 let io = null;
